@@ -1,0 +1,10 @@
+subject=DC = lan, DC = lime, CN = lime-DC1-CA
+issuer=DC = lan, DC = lime, CN = lime-DC1-CA
+notBefore=Dec 18 01:58:07 2024 GMT
+notAfter=Dec 18 02:08:07 2034 GMT
+X509v3 Key Usage: 
+    Digital Signature, Certificate Sign, CRL Sign
+X509v3 Basic Constraints: critical
+    CA:TRUE
+X509v3 Subject Key Identifier: 
+    55:8A:C3:DD:18:5D:7A:EA:82:47:68:98:C8:D4:4E:BB:09:DC:85:86

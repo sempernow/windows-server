@@ -1,0 +1,15 @@
+[Version]
+Signature = "$Windows NT$"
+
+[NewRequest]
+Subject = "CN=LIME-ISSUING-CA,DC=LIME,DC=LAN"
+Exportable = FALSE
+KeyLength = 4096
+KeySpec = 2
+MachineKeySet = TRUE
+ProviderName = "Microsoft Software Key Storage Provider"
+RequestType = PKCS10
+HashAlgorithm = SHA256
+
+[RequestAttributes]
+CertificateTemplate = "SubCA"

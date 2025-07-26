@@ -1,0 +1,1 @@
+Install-WindowsFeature -ConfigurationFilePath < FILE.xml

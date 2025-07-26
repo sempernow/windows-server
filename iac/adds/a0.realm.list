@@ -1,0 +1,14 @@
+lime.lan
+  type: kerberos
+  realm-name: LIME.LAN
+  domain-name: lime.lan
+  configured: kerberos-member
+  server-software: active-directory
+  client-software: sssd
+  required-package: oddjob
+  required-package: oddjob-mkhomedir
+  required-package: sssd
+  required-package: adcli
+  required-package: samba-common-tools
+  login-formats: %U
+  login-policy: allow-realm-logins
