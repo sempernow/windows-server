@@ -1,3 +1,13 @@
+WS2019 to RHEL integration 
+
+- https://chatgpt.com/share/688d52e4-f120-8009-b0b7-5f77c95456fc
+
+Podman subid assignments for domain users
+
+- https://freeipa.readthedocs.io/en/latest/designs/subordinate-ids.html
+- https://www.julioloayzam.com/blog/podman-freeipa-and-subuids/
+
+
 # Q:
 
 What is the advised topology/architecture for Windows Server 

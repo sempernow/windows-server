@@ -1,5 +1,7 @@
 # WS2019 : AD CS
 
+## Issuing (Signing) Leaf Certificates 
+
 ### IIS : Web Enrollment Page : `/certsrv`
 
 This is the __certificate server__ through which authenticated users request and recieve TLS certificates. Its FQDN is that of the Domain Controller hosting it (e.g., `dc1.lime.lan`).
@@ -8,7 +10,7 @@ This is the __certificate server__ through which authenticated users request and
     - CA Name: `lime-DC1-CA` (`CN`)
     - __`https://dc1.lime.lan/certsrv/`__
 
-## Tasks
+### Tasks
 
 1. Request a certificate
     - "[User Certificate](https://dc1.lime.lan/certsrv/certrqbi.asp?type=0)"
@@ -20,7 +22,7 @@ This is the __certificate server__ through which authenticated users request and
     - `certnew.cer` : CA certificate
     - `certnew.p7b` : Fullchain CA certificate
 
-## Download options
+### Download options
 
 - `*.cer` : Certificate of either encoding method
     - Per checkbox:
@@ -47,7 +49,7 @@ using the client-side trust store. Until then,
 the client should treat that certificate as merely a server's claim.
 
 
-## CRL (Certificate Revocation List)
+### CRL (Certificate Revocation List)
 
 Download from ADCS `certsrv` @ https://dc1.lime.lan/certsrv/certcarc.asp
 
@@ -93,130 +95,67 @@ serial=42FBFBF0C52E86AE4B9C1E8CB6040AB2
 
 ---
 
+## Root v. Subordinate CA 
 
-
-### "Enterprise Root CA" v. "Enterprise Subordinate CA"
+Install AD CS as __either__ "Enterprise __Root__ CA" or "Enterprise __Subordinate__ CA"
 
 In AD CS, the title of (IIS) web-enrollment page is "Microsoft Active Directory Certificate Services – <CA-Name>", showing whatever CA is installed on that particular machine. In our case, we installed AD CS role as "Enterprise Root CA" (`CN=lime-DC1`), so the only authority (`CA`) that the built-in web UI can reach is "`lime-DC1-CA`" (the root). 
 
-Creating a __Subordinate CA__ certificate using the built-in "Subordinate Certification Authority" (SubCA) template does not, by itself, change which service the web UI is pointing at; it simply creates a signed certificate that __*could* become a separate CA if on a second machine__ (IP/hostname) having that certificate bound to it.
 
-1. **One CA instance per server.**
-   Each Windows host can only run a single AD CS instance. The "Add Roles and Features → Active Directory Certificate Services → Certification Authority," the wizard asks you to choose a CA Type. We chose "__Enterprise Root CA__," so that machine became the root. At that point, the IIS page `https://<this-server>/certsrv` is configured to offer certificates from that Root CA.
+### Create
 
-2. **Creating a Subordinate CA certificate isn’t the same as installing a second CA role.**
-   When we duplicated or directly used the built-in "Subordinate Certification Authority" (SubCA) template to generate a CSR, we ended up with a certificate (`CN=LIME-ISSUING-CA`) that *could* be used by another CA service. But until we actually spin up a second AD CS service (as a "__Enterprise Subordinate CA__") and __import this signed cert into it__, there is no "`LIME-ISSUING-CA`" service for the web UI to display. In other words:
-
-   * The **template** ("Subordinate Certification Authority") is just a certificate template.
-   * We used it to produce a "Subordinate CA" certificate from our Root.
-   * But we have *not* yet installed a CA service (role) that *hosts* that subordinate-signed certificate.
-
-As a result, the only running CA service is still the root, even though we hold a Subordinate CA certificate in our store, so the enroll page reads "Microsoft Active Directory Certificate Services – lime-DC1-CA"
-
-
-### How to use the Subordnate CA (`LIME-ISSUING-CA`) as the issuing CA
-
-For the intermediate CA (`CN=LIME-ISSUING-CA`) to be the one signing all end-entity TLS certificates, 
-it must be installed onto a __*second* CA instance__. The usual workflow is:
-
-1. **Prepare a second Windows host (or a second IP/hostname).**
-   You cannot install two AD CS CA roles on the same computer name or IP. In a tiny air-gap network, that usually means either:
-
-   * Spinning up a second Windows VM (joined to the same domain) and giving it a unique hostname (e.g. "lime-issuing"), or
-   * Giving your existing server a second network interface with its own distinct DNS name (and then installing a second AD CS role bound to that name).
-
-2. **On that second host, install AD CS as a "Subordinate CA."**
-
-   * On Windows Server 2019 (lime-issuing), run **Server Manager → Add Roles and Features → Active Directory Certificate Services → Certification Authority**.
-   * When prompted for CA Type, choose **"Enterprise Subordinate CA."**
-   * The wizard will generate a new RSA keypair and then export a CSR file (e.g. `lime-issuing-CA.req`).
-
-3. **Submit that CSR to your Root CA (lime-DC1-CA).**
-
-   * On lime-issuing, complete the wizard up to "Generate the certificate request to file."
-   * Copy `lime-issuing-CA.req` over to lime-DC1.
-   * On lime-DC1, open **Certification Authority → Right-click → All Tasks → Submit new request** and pick that `.req`.
-   * Approve/sign it under your Root CA and then export the resulting `.cer` file (or use the web UI to "Download certificate").
-
-4. **Finish the Subordinate CA setup on lime-issuing.**
-
-   * Back on lime-issuing, point the AD CS installer to the signed subordinate certificate (e.g. `lime-issuing-CA.cer`) and to the Root CA’s chain.
-   * The wizard will import both certificates into the local CA database. Now lime-issuing is running as an Enterprise Subordinate CA, and its web-enroll endpoint (`https://lime-issuing/certsrv`) will show up as "Microsoft Active Directory Certificate Services – LIME-ISSUING-CA."
-
-5. **Point all users/clients at the Subordinate CA for day-to-day certificate requests.**
-
-   * For any new "Request a certificate" via web UI, they would browse to `https://lime-issuing/certsrv` (or use Group Policy auto-enrollment) instead of the Root CA.
-   * That way, `LIME-ISSUING-CA` issues leaf certificates (e.g. TLS certs for your web servers, etc.), and the end-entity certificates carry a chain → \[Subordinate: `LIME-ISSUING-CA`] → \[Root: `lime-DC1-CA`].
-
----
-
-### What the trust bundle should look like
-
-Once `LIME-ISSUING-CA` is properly installed and issuing certificates, every client (or service) that needs to trust a server certificate from `LIME-ISSUING-CA` must have:
-
-1. **The Root CA certificate (`lime-DC1-CA`) in their Trusted Root store**, and
-2. **The Subordinate CA certificate (`LIME-ISSUING-CA`) in their Intermediate CA store** (or in one combined chain file, depending on the application).
-
-When you export the Subordinate CA certificate (e.g. from the CA console on lime-issuing), __include the full chain__. For example:
-
-```text
-—–BEGIN CERTIFICATE—–  
-(Certificate for LIME-ISSUING-CA)  
-—–END CERTIFICATE—–  
-
-—–BEGIN CERTIFICATE—–  
-(Certificate for lime-DC1-CA)  
-—–END CERTIFICATE—–
-```
-
-You can then import that two-cert bundle (ordered \[subordinate → root]) into any appliance or service you want to trust. That ensures that when a TLS client sees a server cert signed by LIME-ISSUING-CA, it can build the chain up to the root and succeed.
-
----
-
-### Summary
-
-* **As long as your server is hosting only the Root CA service**, the web UI at `https://<this-server>/certsrv` will continue to be named "Microsoft Active Directory Certificate Services – lime-DC1-CA."
-* **To have "LIME-ISSUING-CA" show up as an issuing CA, you must install a separate AD CS instance** (on its own DNS name/IP) as an *Enterprise Subordinate CA*, import the signed subordinate certificate, and then *use that second host* ([https://lime-issuing/certsrv](https://lime-issuing/certsrv)) for day-to-day enrollment.
-* **Once that’s in place**, end-entity TLS certificates are signed by LIME-ISSUING-CA, and clients simply need both the subordinate and root CA certificates in their trust stores (or in a combined chain) to validate any issued certificate.
-
-In short, you do want your Subordinate CA (LIME-ISSUING-CA) to do the actual "leaf" signing and to appear in the trust chain, but in AD CS terms, that means running a *second* CA service (on a separate host or at least a separate DNS name). Only then will the web UI reflect "LIME-ISSUING-CA" instead of the Root CA name.
-
+Regardless of whether root or subordinate, 
+the CA key/cert are created using __Windows Server 2019__ Wizard (GUI) 
+when adding Role(s) for __Certificate Authority__ (AD CS).
 
 ## Root CA certificate
-
-### UPDATE  
-
-#### v1
 
 __See `rootCA()`__ of __`make.recipes.sh`__ at project root.
 
 And create the Root CA by running: `make rootca` .
 
 This is the domain's root CA and is kept offline. 
-AD CS is then provisioned as the "Enterprise Subordinate CA", 
-for integration with K8s projctes such as __cert-manager__ 
-to handles all things TLS. 
-
-That is, we escape the manual Microsoft/GUI hellscape 
-to allow for automated TLS provisioning and renewals, and all else by DevOps methods.
 
 Then add AD CS role to the WinSrv2019 host, 
-creating an Enterprise Subordinate CA. 
+creating an __Enterprise Subordinate CA__. 
+
+That will function along side peer provisioners 
+such as __cert-manager__, __Dogtag__, etc. 
+to sign leaf certificates and otherwise handle all things TLS. 
+
+This decouple (almost) TLS entirely from the manual Microsoft/GUI hellscape, 
+to allow for automated TLS provisioning and renewals, 
+and all else by DevOps methods, 
+and yet allow for using legacy methods of Microsoft/ADCS where we must.
+
+## Subordinate CA
 
 See [__Enterprise Subordinate CA setup__](https://chatgpt.com/share/6883da02-1484-8009-88da-1282f41337b8)
 
-#### v2
+### Workflow
 
-Decouple (almost) TLS entirely from the Windows hellscape, 
-with cert-manager itself being the subordinate CA signed by the domain's root CA. 
+#### 1. Root CA remains offline (or air-gapped)
 
-See [__Enterprise Subordinate CA setup__](https://chatgpt.com/share/6883da02-1484-8009-88da-1282f41337b8)
+* The Root CA is responsible only for signing the Subordinate CA’s CSR (certificate signing request).
+* The Root CA should never share its private key with any other system — including the Subordinate CA.
 
+#### 2. Subordinate CA generates CSR
 
-### Create
+* During the __AD CS configuration wizard__ on the Windows Server that will act as the Subordinate CA:
+    * Choose __Enterprise Subordinate CA__.
+    * Generate a new private key.
+    * Export the certificate request (CSR) to a file.
 
-Create using __Windows Server 2019__ Wizard (GUI) 
-whilst adding Roles for __Certificate Authority__ (AD CS).
+#### 3. Offline Root CA signs CSR
+
+* On the offline Root CA (Linux/OpenSSL in your case), use the Root CA’s private key to sign the CSR from the Windows Subordinate CA.
+* Return only the signed Subordinate CA certificate (and optionally the full chain) to the Windows Server.
+
+#### 4. Subordinate CA completes installation
+
+* Import the signed certificate into the Windows Subordinate CA via the AD CS configuration wizard or certutil.
+* The CA service is now ready to issue certificates in Active Directory, chained to your offline Root CA.
+
 
 ### Export 
 
@@ -453,59 +392,6 @@ $cert       = Get-ADObject -LDAPFilter "(cn=$caName)" -SearchBase "CN=Certificat
 
 [System.IO.File]::WriteAllBytes($filePath, $cert."cACertificate"[0])
 
-```
-
-__FAILing__
-
-```powershell
-# Make the prompt readable
-function prompt {
-    "$PWD`n> "
-}
-
-# Set working dir
-net use S: "\\tsclient\S" /persistent:yes
-set-location S:\DC01\IaC\adcs\limeSubordinateCA
-#net use S: /delete
-
-# Set params
-$path = (Get-Location).Path
-$template = "$path\limeSubordinateCA"
-
-# Define INF content (ensure this runs BEFORE Out-File)
-$infContent = @'
-[Version]
-Signature = "$Windows NT$"
-
-[NewRequest]
-Subject = "CN=LIME-ISSUING-CA, DC=LIME, DC=LAN"
-Exportable = FALSE
-KeyLength = 4096
-KeySpec = 2
-MachineKeySet = TRUE
-ProviderName = "Microsoft Software Key Storage Provider"
-RequestType = PKCS10
-HashAlgorithm = SHA256
-KeyUsage = "CERT_DIGITAL_SIGNATURE_KEY_USAGE, CERT_KEY_CERT_SIGN_KEY_USAGE, CERT_CRL_SIGN_KEY_USAGE"
-
-[Extensions]
-BasicConstraints = "critical,CA:true,pathlength:1"
-'@
-$infContent | Out-File "$template.inf" -Encoding ASCII
-
-# Generate the CSR
-certreq -new "$template.inf" "$template.req"
-
-# Verify
-certutil -dump "$template.req"
-
-```
-
-```powershell
-[EnhancedKeyUsageExtension]
-OID=1.3.6.1.5.5.7.3.2 ; Client Authentication
-OID=1.3.6.1.5.5.7.3.1 ; Server Authentication (optional, but common for PKI)
-OID=2.5.29.37.0       ; Any Purpose (sometimes used for flexibility)
 ```
 
 #### 2. Issue the Certificate from Your Root CA
