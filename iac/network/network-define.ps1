@@ -6,7 +6,9 @@ $ExtAdapterName = "Eth2"
 if (-not (Get-NetAdapter | Where-Object { $_.Name -eq $ExtAdapterName })) {
     throw "❌ ERROR: External adapter '$ExtAdapterName' not found. Cannot create external switch."
 }
+
 # Optional: Warn if adapter is present but not 'Up'
+$extAdapter = Get-NetAdapter -Name "$ExtAdapterName" -ErrorAction SilentlyContinue
 if ($extAdapter.Status -ne 'Up') {
     Write-Warning "⚠️ Adapter '$ExtAdapterName' is present but not Up (Status: $($extAdapter.Status)). Proceeding anyway..."
 }
