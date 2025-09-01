@@ -1,6 +1,16 @@
 # Load module dependency
 Import-Module Hyper-V
 
+# ExtAdapterName is the physical adapter backing everything here.
+$ExtAdapterName = "Eth2"
+if (-not (Get-NetAdapter | Where-Object { $_.Name -eq $ExtAdapterName })) {
+    throw "❌ ERROR: External adapter '$ExtAdapterName' not found. Cannot create external switch."
+}
+# Optional: Warn if adapter is present but not 'Up'
+if ($extAdapter.Status -ne 'Up') {
+    Write-Warning "⚠️ Adapter '$ExtAdapterName' is present but not Up (Status: $($extAdapter.Status)). Proceeding anyway..."
+}
+
 # Must align with Get-NetRoute parameters : See network-get.ps1
 $DefSwName = "Default Switch"
 $WslSwName = "WSL (Hyper-V firewall)"

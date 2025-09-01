@@ -7,16 +7,19 @@
 
 . .\network-define.ps1 
 
-## Virtual Switch Creation: Create Hyper-V Internal Switch if not exist
+## Create Hyper-V EXTERNAL Switch if not exist
+if (-not (Get-VMSwitch -Name "$ExtSwName" -ErrorAction SilentlyContinue)) {I
+    New-VMSwitch -Name "$ExtSwName" -NetAdapterName "$ExtAdapterName" -AllowManagementOS $true
+    Start-Sleep -Seconds 5
+}
+
+## ICreate Hyper-V INTERNAL Switch if not exist
 if (-not (Get-VMSwitch -Name "$NatSwName" -ErrorAction SilentlyContinue)) {
     New-VMSwitch -Name "$NatSwName" -SwitchType Internal # -Notes "Internal NAT Subnet"
     Start-Sleep -Seconds 5
 }
 
 . .\network-define.ps1 
-
-## Add External VMSwitch
-#New-VMSwitch -Name "$ExtSwName" -NetAdapterName "vEthernet" -AllowManagementOS $true
 
 ## Add Virtural Adapter to External Switch, attached to Windows OS (rather than a VM).
 # Add-VMNetworkAdapter -Name "$ExtSwName" -ManagementOS -SwitchName "$ExtSwName" 
