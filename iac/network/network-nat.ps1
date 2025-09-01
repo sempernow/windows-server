@@ -19,7 +19,7 @@ if (-not (Get-VMSwitch -Name "$NatSwName" -ErrorAction SilentlyContinue)) {
 #New-VMSwitch -Name "$ExtSwName" -NetAdapterName "vEthernet" -AllowManagementOS $true
 
 ## Add Virtural Adapter to External Switch, attached to Windows OS (rather than a VM).
-#Add-VMNetworkAdapter -Name "$ExtSwName" -ManagementOS -SwitchName "$ExtSwName" 
+# Add-VMNetworkAdapter -Name "$ExtSwName" -ManagementOS -SwitchName "$ExtSwName" 
 
 ## Rename Adapter
 #Rename-NetAdapter -InterfaceAlias 'OldName' -NewName "NewName"
@@ -49,10 +49,10 @@ if (-not (Get-NetIPAddress -InterfaceAlias "$NatAlias" -IPAddress $NatGateway -E
 ## Enable IP packet forwarding across subnets (adapters) else NAT subnet has no connectivity.
 ## Packet forwarding does not persist : Altered on reboot and OpenVPN-TAP toggle/usage. 
 ## See network-taskscheduler-enable-forwarding.ps1
-Set-NetIPInterface -InterfaceAlias "$ExtAlias" -Forwarding Enabled -Verbose
-Set-NetIPInterface -InterfaceAlias "$WslAlias" -Forwarding Enabled -Verbose
-Set-NetIPInterface -InterfaceAlias "$DefAlias" -Forwarding Enabled -Verbose
-Set-NetIPInterface -InterfaceAlias "$NatAlias" -Forwarding Enabled -Verbose
+Set-NetIPInterface -InterfaceAlias "$ExtAlias" -AddressFamily IPv4 -Forwarding Enabled -Verbose
+Set-NetIPInterface -InterfaceAlias "$WslAlias" -AddressFamily IPv4 -Forwarding Enabled -Verbose
+Set-NetIPInterface -InterfaceAlias "$DefAlias" -AddressFamily IPv4 -Forwarding Enabled -Verbose
+Set-NetIPInterface -InterfaceAlias "$NatAlias" -AddressFamily IPv4 -Forwarding Enabled -Verbose
 ## Else all at once if all named 'vEthernet (*' :
 #Get-NetIPInterface | Where-Object {$_.InterfaceAlias -like 'vEthernet (*' } | Set-NetIPInterface -Forwarding Enabled -Verbose
 

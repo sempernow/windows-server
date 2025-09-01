@@ -1,4 +1,4 @@
-## Set ICACLS for, e.g., ssh u1@a0, to abide ~/.ssh/config
+## Set ICACLS of ~/.ssh to satisfy OpenSSL requirements
 
 $sshDir = "$env:USERPROFILE\.ssh"
 
