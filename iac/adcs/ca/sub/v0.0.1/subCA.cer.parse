@@ -1,0 +1,5 @@
+subject=DC = LAN, DC = LIME, CN = LIME-ISSUING-CA
+issuer=DC = lan, DC = lime, CN = lime-DC1-CA
+notBefore=May 31 18:54:41 2025 GMT
+notAfter=May 31 19:04:41 2027 GMT
+

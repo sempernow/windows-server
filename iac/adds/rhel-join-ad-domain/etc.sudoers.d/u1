@@ -1,0 +1,2 @@
+u1  ALL=(ALL)  ALL
+Defaults:%u1 secure_path = /sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin

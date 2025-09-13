@@ -1,0 +1,2 @@
+%ad-linux-sudoers  ALL=(ALL) NOPASSWD: ALL
+Defaults:%ad-linux-sudoers  secure_path = /sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin

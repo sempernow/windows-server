@@ -1,0 +1,10 @@
+subject=CN = Lime LAN Root CA, O = Lime LAN, OU = lime.lan, C = US
+issuer=CN = Lime LAN Root CA, O = Lime LAN, OU = lime.lan, C = US
+notBefore=Aug  9 18:21:36 2025 GMT
+notAfter=Aug  7 18:21:36 2035 GMT
+X509v3 Basic Constraints: critical
+    CA:TRUE
+X509v3 Key Usage: critical
+    Digital Signature, Certificate Sign, CRL Sign
+X509v3 Subject Key Identifier: 
+    13:45:9A:B7:0F:73:67:AD:D6:AE:F5:E8:6A:36:20:20:98:80:51:94

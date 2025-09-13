@@ -1,0 +1,19 @@
+subject=CN = dc1.lime.lan
+issuer=DC = lan, DC = lime, CN = lime-DC1-CA
+notBefore=Dec 18 09:57:49 2024 GMT
+notAfter=Dec 18 09:57:49 2025 GMT
+X509v3 Extended Key Usage: 
+    TLS Web Client Authentication, TLS Web Server Authentication
+X509v3 Key Usage: critical
+    Digital Signature, Key Encipherment
+X509v3 Subject Key Identifier: 
+    F8:71:72:70:44:55:19:20:66:3C:7A:89:71:D7:B3:FE:20:B2:64:DA
+X509v3 Authority Key Identifier: 
+    55:8A:C3:DD:18:5D:7A:EA:82:47:68:98:C8:D4:4E:BB:09:DC:85:86
+X509v3 CRL Distribution Points: 
+    Full Name:
+      URI:ldap:///CN=lime-DC1-CA,CN=dc1,CN=CDP,CN=Public%20Key%20Services,CN=Services,CN=Configuration,DC=lime,DC=lan?certificateRevocationList?base?objectClass=cRLDistributionPoint
+Authority Information Access: 
+    CA Issuers - URI:ldap:///CN=lime-DC1-CA,CN=AIA,CN=Public%20Key%20Services,CN=Services,CN=Configuration,DC=lime,DC=lan?cACertificate?base?objectClass=certificationAuthority
+X509v3 Subject Alternative Name: 
+    othername: 1.3.6.1.4.1.311.25.1::<unsupported>, DNS:dc1.lime.lan

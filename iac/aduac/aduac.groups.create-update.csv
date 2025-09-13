@@ -1,0 +1,5 @@
+GroupName,OUPath,Description,GroupScope,GroupCategory
+SalesTeam,"OU=Groups,OU=Sales,DC=lime,DC=lan","Sales Department",Global,Security
+ITAdmins,"OU=Groups,OU=IT,DC=lime,DC=lan","IT Administrators",Global,Security
+DevTeam,"OU=Groups,OU=Engineering,DC=lime,DC=lan","Development Team",Global,Security
+TempStaff,"OU=Groups,OU=HR,DC=lime,DC=lan","Temporary Staff",DomainLocal,Security

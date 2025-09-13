@@ -1,0 +1,16 @@
+# Generated @ make.recipes.sh
+[ req ]
+prompt              = no
+default_bits        = 4096
+default_md          = sha256
+distinguished_name  = req_distinguished_name
+x509_extensions = v3_ca
+[ req_distinguished_name ]
+CN  = Lime LAN Root CA
+O   = Lime LAN
+OU  = lime.lan
+C   = US
+[ v3_ca ]
+basicConstraints        = critical, CA:TRUE # Append pathlen:1 to limit chain to one subordinate CA
+keyUsage                = critical, digitalSignature, keyCertSign, cRLSign
+subjectKeyIdentifier    = hash
