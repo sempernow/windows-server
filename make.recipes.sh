@@ -56,6 +56,10 @@ rootCA(){
     # openssl req -x509 -new -nodes -keyout $path.key -days $days -config $path.cnf -extensions v3_ca 
     #     -out $path.crt
 
+    # Encrypt key into PEM format for public storage (commit)
+    type -t age >/dev/null 2>&1 &&
+        age -a -r $(age-keygen -y ~/.age/age-tls-keys-20250913) -o $path.key.age $path.key
+
     echo "🔍  Parse the certificate located at '$path.crt'" >&2 # man x509v3_config
     # The extension (x509v3) of most interest in leaf certs is subjectAltName (SAN); other ext's are mostly inspected of CA certs.
     x509v3='subjectAltName,issuerAltName,basicConstraints,keyUsage,extendedKeyUsage,authorityInfoAccess,subjectKeyIdentifier,authorityKeyIdentifier,crlDistributionPoints,issuingDistributionPoints,policyConstraints,nameConstraints'

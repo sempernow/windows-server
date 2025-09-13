@@ -73,9 +73,10 @@ menu :
 	@echo "html         : Process all markdown (MD) to HTML"
 	@echo "commit       : Commit and push this source"
 	@echo "============== "
-	@echo "rootca       : Create PKI for Lime LAN Root CA"
-	@echo "updateca     : Add CA certificate to RHEL trust store"
-	@echo "testca       : Test CA by client HTTPS request to DC1"
+	@echo "rootca       : Create, push, and verify Root CA cert is in trust store of RHEL hosts"
+	@echo "  -make      : Create PKI for Lime LAN Root CA"
+	@echo "  -push      : Add CA certificate to trust store of RHEL hosts"
+	@echo "  -test      : Test CA by client HTTPS request to DC1"
 
 env :
 	$(INFO) 'Environment'
@@ -123,14 +124,15 @@ status hello :
 	    && printf "%12s: %s\n" containerd $$(systemctl is-active containerd) \
 	    && printf "%12s: %s\n" kubelet $$(systemctl is-active kubelet) \
 	'
-rootca :
-	bash make.recipes.sh rootCA
 
+rootca-make :
+	bash make.recipes.sh rootCA
+# The cert created at rootca-make is *not* used by -push or -test as the CA certificate
 cadir := iac/adcs/ca/root/v0.0.1
 capem := lime-DC1-CA-fullchain.pem
-updateca :
+rootca-push :
 	ansibash -u ${cadir}/${capem}
 	ansibash -u iac/adcs/update-ca-trust.sh
 	ansibash sudo bash update-ca-trust.sh ${capem}
-testca :
-	ansibash 'curl -sfI https://dc1.lime.lan |grep HTTP || echo ERR $$?'
+rootca-test :
+	ansibash 'curl -sfI https://${DC_FQDN} |grep HTTP || echo ERR $$?'
