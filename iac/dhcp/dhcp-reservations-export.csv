@@ -1,4 +1,4 @@
-﻿"ScopeId","Name","IPAddress","ClientId","Description","Type"
+"ScopeId","Name","IPAddress","ClientId","Description","Type"
 "192.168.11.0","a0.lime.lan","192.168.11.100","00-15-5d-1c-2f-06","Admin host","Both"
 "192.168.11.0","a1.lime.lan","192.168.11.101","00-15-5d-1c-2f-03","K8s node","Both"
 "192.168.11.0","a2.lime.lan","192.168.11.102","00-15-5d-1c-2f-04","K8s node","Both"

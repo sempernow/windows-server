@@ -11,3 +11,15 @@ foreach ($scope in $groupScopes) {
         Select-Object Name, GroupCategory, ObjectClass, DistinguishedName
     $groups | Format-Table -AutoSize
 }
+
+exit 
+
+# ...
+# SCOPE : Global
+
+# Name             GroupCategory ObjectClass DistinguishedName
+# ----             ------------- ----------- -----------------
+# ad-linux-users        Security group       CN=ad-linux-users,OU=Groups,OU=OU1,DC=lime,DC=lan
+# ad-linux-sudoers      Security group       CN=ad-linux-sudoers,OU=Groups,OU=OU1,DC=lime,DC=lan
+# ad-nfsanon            Security group       CN=ad-nfsanon,OU=Groups,OU=OU1,DC=lime,DC=lan
+# ad-domain-users       Security group       CN=ad-domain-users,OU=Groups,OU=OU1,DC=lime,DC=lan

@@ -1,4 +1,4 @@
-# Get adapter information
+## Get adapter information : PowerShell output *cannot* be captured to a file. 
 
 if (-not "$NatAlias") { . .\network-define.ps1 }
 
@@ -36,49 +36,52 @@ Write-Output "`
 
 Write-Host '=== Switches'
 
-Get-VMSwitch `
-    | Select-Object Name, SwitchType, DetAdapterInterfaceDescription `
-    | Out-Host
+Get-VMSwitch |
+    Select-Object Name, SwitchType, DetAdapterInterfaceDescription |
+    Out-Host
 
 Write-Host '=== Interfaces'
 
-Get-NetAdapter -IncludeHidden `
-    | Select-Object Name, InterfaceDescription, ifIndex `
-    | Where-Object { $_.Name -like "vEthernet*" } `
-    | Out-Host
+Get-NetAdapter -IncludeHidden |
+    Select-Object Name, InterfaceDescription, ifIndex |
+    Where-Object { $_.Name -like "vEthernet*" } |
+    Out-Host
 
-# Write-Output $Adapters `
-#     | Select-Object InterfaceAlias, IPAddress, PrefixLength `
-#     | Out-Host
+## All interfaces
+# Write-Output $Adapters |
+#     Select-Object InterfaceAlias, IPAddress, PrefixLength |
+#     Out-Host
 
+## vEthernet (aliased) interfaces only
 if ("$DefAlias") {
-    Get-NetIPAddress | Where-Object { $_.InterfaceAlias -like 'vEthernet (*' } `
-    | Where-Object { $_.AddressFamily -eq "IPv4" } `
-    | Select-Object InterfaceAlias, IPAddress, PrefixLength `
-    | Out-Host
+    Get-NetIPAddress | Where-Object { $_.InterfaceAlias -like 'vEthernet (*' } |
+        Where-Object { $_.AddressFamily -eq "IPv4" } |
+        Select-Object InterfaceAlias, IPAddress, PrefixLength |
+        Out-Host
 }
 
 Write-Host '=== Routes'
 
-Get-NetRoute | Where-Object { `
-    $_.DestinationPrefix -like "$DefNtwk.*" -or $_.NextHop -like "$DefNtwk.*"`
-    -or $_.DestinationPrefix -like "$WslNtwk.*" -or $_.NextHop -like "$WslNtwk.*"`
-    -or $_.DestinationPrefix -like "$ExtNtwk.*" -or $_.NextHop -like "$ExtNtwk.*"`
-    -or $_.DestinationPrefix -like "$NatNtwk.*" -or $_.NextHop -like "$NatNtwk.*"`
-} | Select-Object DestinationPrefix, NextHop, ifIndex `
-    | Out-Host
+Get-NetRoute | Where-Object {
+        $_.DestinationPrefix -like "$DefNtwk.*" -or $_.NextHop -like "$DefNtwk.*"`
+        -or $_.DestinationPrefix -like "$WslNtwk.*" -or $_.NextHop -like "$WslNtwk.*"`
+        -or $_.DestinationPrefix -like "$ExtNtwk.*" -or $_.NextHop -like "$ExtNtwk.*"`
+        -or $_.DestinationPrefix -like "$NatNtwk.*" -or $_.NextHop -like "$NatNtwk.*"`
+    } | Select-Object DestinationPrefix, NextHop, ifIndex |
+    Out-Host
 
 Write-Host "=== Route Table`n"
 
-route print -4 `
-    | Select-String "$DefNtwk\.0|$WslNtwk\.0|$ExtNtwk\.0|$NatNtwk\.0" `
-    | ForEach-Object { $_.Line } `
-    | Out-Host
+route print -4 |
+    Select-String "$DefNtwk\.0|$WslNtwk\.0|$ExtNtwk\.0|$NatNtwk\.0" |
+    ForEach-Object { $_.Line } |
+    Out-Host
 
 Write-Host "`n=== NAT Subnet"
 
-Get-NetNat | Select-Object Name, InternalIPInterfaceAddressPrefix `
-    | Out-Host
+Get-NetNat |
+    Select-Object Name, InternalIPInterfaceAddressPrefix |
+    Out-Host
 
 Write-Host '=== DNS'
 
@@ -105,12 +108,12 @@ Get-DnsClientServerAddress |
 Write-Host '=== DHCP and Forwarding'
 
 if ("$DefAlias") {
-    Get-NetIPInterface | Where-Object { $_.InterfaceAlias -like 'vEthernet (*' } `
-    | Where-Object { $_.AddressFamily -eq "IPv4" } `
-    | Select-Object InterfaceAlias, AddressFamily, InterfaceMetric, Dhcp, Forwarding, ConnectionState `
-    | Format-Table `
-    | Out-Host
+    Get-NetIPInterface |
+        Where-Object { $_.InterfaceAlias -like 'vEthernet (*' } |
+        Where-Object { $_.AddressFamily -eq "IPv4" } |
+        Select-Object InterfaceAlias, AddressFamily, InterfaceMetric, Dhcp, Forwarding, ConnectionState |
+        Format-Table |
+        Out-Host
 }
-
 
 # Get-NetIPConfiguration

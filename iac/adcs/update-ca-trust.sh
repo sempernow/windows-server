@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
-#####################################################
-# Update RHEL trust store with DC1 CA certificate
-#####################################################
+########################################################
+# Update RHEL trust store with cert of domain's CA
+#
+# ARGs: CA_CERTIFICATE_PATH 
+########################################################
 [[ "$(id -u)" -ne 0 ]] && {
     echo "️❌ ERR : MUST run as root" >&2
 
@@ -24,6 +26,7 @@ update-ca-trust || {
     exit 33
 }
 
+# Requires CA and host having same domain.
 ref=$(hostname -d)
 head /etc/ssl/certs/ca-bundle.crt |grep ${ref%.*} || {
     echo "️❌ ERR : CA reference '${ref%.*}' NOT found in ca-bundle.crt" >&2

@@ -160,9 +160,9 @@ Networking : Connectivity between WSL2 &amp; Hyper-V VMs
 
 ### The NAT subnet option : [Overview of best options](https://chatgpt.com/share/67391a83-bdbc-8009-99fb-d69281826092 "ChatGPT")
 
-@ [`network-nat.ps1`](network-nat.ps1)
+@ [`network-set.ps1`](iac/network/network-set.ps1)
 
-See params it configured by running [`network-get.ps1`](network-get.ps1)
+See params it configured by running [`network-get.ps1`](iac/network/network-get.ps1)
 
 1. User above script or Hyper-V GUI to create the Internal Switch (`InternalSwitchNAT1`)
     - PowerShell script above creates the switch if not exist, yet using it to do so prior to finding the packet-forwarding solution mentioned below resulted in failure of connectivity tests.
@@ -229,7 +229,7 @@ ___Success!___
 
 ### Add local DNS for best performance: 
 
-@ [`network-dns.ps1`](network-dns.ps1)
+@ [`network-dns.ps1`](iac/network/network-dns.ps1)
 
 Keep the default DNS configuration of WSL2 host:
 
@@ -244,7 +244,7 @@ Keep the default DNS configuration of WSL2 host:
 # nameserver 10.255.255.254
 # search SEMPERLAN hsd1.md.comcast.net
 ```
-- See [`network-dns.ps1`](network-dns.ps1)
+- See [`network-dns.ps1`](iac/network/network-dns.ps1)
 
 ## Create VM of Hyper-V
 
@@ -324,9 +324,9 @@ Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies
 1. __Ethernet adapter__ (`ncpa.cpl`)
     - Reference the network (`InternalSwitchNAT1`) __installed earlier__   
       in a PowerShell session at the host (Windows 11) :  
-        - [`network-nat.ps1`](network-nat.ps1)
-        - [`network-define.ps1`](network-define.ps1)
-        - [`network-get.ps1`](network-get.ps1)
+        - [`network-set.ps1`](iac/network/network-set.ps1)
+        - [`network-define.ps1`](iac/network/network-define.ps1)
+        - [`network-get.ps1`](iac/network/network-get.ps1)
     - Ethernet adapter configuration:
         - Properties:
             - IPv6 (Uncheck)
@@ -530,7 +530,7 @@ Get-DhcpServerv4<TAB>
 1. Open **DHCP Manager** (`dhcpmgmt.msc`).
 2. Right-click on **IPv4** and select **New Scope**.
     - **Scope Name**: `lime.lan`.
-    - **IP Range**: Set the IP range for the internal network. Align these with `InternalSwitchNAT1` subnet ([`network-nat.ps1`](network-nat.ps1)) parameters. See by running  [`network-get.ps1`](network-get.ps1)
+    - **IP Range**: Set the IP range for the internal network. Align these with `InternalSwitchNAT1` subnet ([`network-set.ps1`](iac/network/network-set.ps1)) parameters. See by running  [`network-get.ps1`](iac/network/network-get.ps1)
         - **Start IP**: `192.168.11.100`
         - **End IP**: `192.168.11.200`
         - **Subnet Mask**: `255.255.255.0`
