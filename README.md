@@ -40,20 +40,33 @@ Requirements:
 
 ### [Windows Admin Center](https://learn.microsoft.com/en-us/windows-server/manage/windows-admin-center/overview) (WAC) | [Chocolatey Package](https://community.chocolatey.org/packages?q=windows%20admin%20center)
 
-UPDATE: This is __another useless Microsoft product__. It manages to log in to the domain controller, though having no ability to save credentials. And then it lists roles and such, but has none of the interfaces to any of the roles. 
-
-__It merely lists the roles! That's all it does!__
-
-PRIOR ...
-
 A locally-deployed, __browser-based management tool__ set built to manage Windows Clients, Servers, and Clusters without needing to connect to the cloud. Windows Admin Center offers full control over all aspects of Windows-based server infrastructure and is __particularly useful for managing on-prem servers__.
 
-WAC __requires its own separate installation__.WAC is not a built-in feature of WS2019.  
+WAC __requires its own separate installation__. WAC is not a built-in feature of WS2019.  
 While it is designed to manage Windows Server environments, WAC itself is a web-based management tool that must be downloaded and installed manually.
 
 Once installed, you can __use WAC to manage multiple Windows Servers, Hyper-V hosts, clusters, and even Windows 10 and 11 PCs__ from a single web-based interface. It simplifies server management tasks by centralizing the management tools and offering a modern, unified experience.
 You can install WAC on a Windows Server or Windows client and access it via a web browser. 
 It can also be deployed in a high-availability setup in larger environments.
+
+
+#### Install
+
+__2019__
+
+```powershell
+# Method 1. Silent install with HTTPS on port 443
+msiexec /i WindowsAdminCenter.msi /qn /L*v log.txt SME_PORT=443 SSL_CERTIFICATE_OPTION=generate
+
+# Method 2. Download and install
+Invoke-WebRequest -Uri "https://aka.ms/WACDownload" -OutFile "$env:TEMP\WAC.msi"
+Start-Process msiexec -ArgumentList "/i $env:TEMP\WAC.msi /qn" -Wait
+```
+
+__2022__
+
+Installs onto the Windows Server via Roles and Features
+
 
 ## Realm v. Domain v. Forest v. Tree
 
