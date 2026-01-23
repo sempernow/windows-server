@@ -89,7 +89,7 @@ eol :
 	find . -type f ! -path '*/.git/*' -exec dos2unix {} \+
 mode :
 	find . -type d ! -path './.git/*' -exec chmod 0755 "{}" \;
-	find . -type f ! -path './.git/*' ! -iname '*.key' -exec chmod 0644 "{}" \;
+	find . -type f ! -path './.git/*' ! -iname '*.key' -exec chmod 0640 "{}" \;
 	find . -type f -path './iac/adcs/ca/*' -exec chmod 0440 "{}" \;
 	find . -type f -path './iac/adcs/leaf/*' -exec chmod 0440 "{}" \;
 	find . -type f ! -path './.git/*' -iname '*.key' -exec chmod 0400 "{}" \;

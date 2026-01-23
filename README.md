@@ -259,6 +259,19 @@ Keep the default DNS configuration of WSL2 host:
 ```
 - See [`network-dns.ps1`](iac/network/network-dns.ps1)
 
+#### DNS Manager GUI : Subdomains : `*.kube.lime.lan`
+
+If CNAME is a __wildcard subdomain__ (`*.kube.lime.lan`) 
+to an Apex (A) record (`kube.lime.lan`) in a __domain folder__ (`lime.lan`), 
+then DNS Manager creates a __subfolder__ under the domain's folder
+that contains (at least) two CNAME records having `Name`:
+
+- `(same as parent folder)`
+- `*`
+
+along with CNAME records of any other explicitly-declared subdomain names.
+All of which have `Data`: `kube.lime.lan.`
+
 ## Create VM of Hyper-V
 
 - Generation: `2` 
