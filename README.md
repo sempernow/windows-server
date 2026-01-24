@@ -1,6 +1,5 @@
 # [Windows Server](https://www.microsoft.com/en-us/evalcenter/evaluate-windows-server-2019?msockid=05311f3dde09664d0afc0b53dfa16779 "microsoft.com") 2019 | [Docs](https://learn.microsoft.com/en-us/windows-server/)
 
-
 ## Overview
 
 Windows Server remains the industry standard domain controller for IdP (AD DS), IdM (AD UAC), X.509 (AD CS), DNS and DHCP. Linux (RHEL) hosts join into its domain via realm and SSSD.
@@ -67,6 +66,82 @@ __2022__
 
 Installs onto the Windows Server via Roles and Features
 
+---
+
+## RDC (**R**emote **D**esktop **C**onnect)
+
+If admin host is Windows, use RDC to access the Windows Server.
+
+It creates UNC path __`\\tsclient`__ as a "Share";
+however, this is *not* SMB (CIFS). 
+It's an RDP (**R**emote **D**esktop **P**rotocol) redirect.
+RDP uses a virtual channel, 
+RDPDR (**R**emote **D**esktop **P**rotocol **D**evice **R**edirection), 
+to expose client drives.
+It's tunneled over the RDP connection itself.
+
+So it's neither a Windows Server default share (like `ADMIN$`, `C$`, `IPC$`) 
+nor a manually created SMB share. 
+It's purely an RDP session construct that ___disappears on disconnect___.
+
+---
+
+## SMB (CIFS)
+
+__See `README`__ @ `./iac/smb-krb5-rhel-and-k8s/` ([MD](iac/smb-krb5-rhel-and-k8s/README.md)|[HTML](iac/smb-krb5-rhel-and-k8s/README.html))
+
+### TL;DR
+
+**Keytab** (generated on Windows DC):
+
+```powershell
+# Generate keytab on Windows DC:
+$netbios    = "LIME"
+$realm      = "$netbios.LAN"
+$sa         = "svc-smb-rw"
+$pass       = "__REDACTED__"
+
+ktpass -princ $sa@$realm -mapuser $netbios\$sa -crypto AES256-SHA1 -ptype KRB5_NT_PRINCIPAL -pass $pass -out "$sa.keytab"
+
+```
+
+**Keytab permissions** (on RHEL):
+
+```bash
+sudo chown svc-smb-rw:svc-smb-rw /etc/svc-smb-rw.keytab
+sudo chmod 600 /etc/svc-smb-rw.keytab
+```
+
+**Ticket acquisition** (as the service account user):
+
+```bash
+sudo -u svc-smb-rw kinit -k -t /etc/svc-smb-rw.keytab svc-smb-rw@LIME.LAN
+```
+
+**Mount**:
+
+```bash
+realm=LIME
+server=dc1.lime.lan
+share=SMBdata
+mnt=/mnt/smb-data-01
+svc=svc-smb-rw
+mkdir -p $mnt
+uid="$(id -u $svc)"
+gid="$(id -g $svc)"
+mount -t cifs //$server/$share $mnt \
+    -o sec=krb5,vers=3.0,cruid=$uid,uid=$uid,gid=$gid,file_mode=0640,dir_mode=0775
+
+```
+
+**Gotchas to remember**:
+
+- KVNO must match between keytab and AD (regenerate keytab after password changes)
+- Ticket must be in the correct user's cache (not root's)
+- `ktutil` on Linux doesn't know the real KVNO—use `ktpass` on Windows
+
+
+**Windows Server Side**
 
 ## Realm v. Domain v. Forest v. Tree
 
@@ -124,6 +199,8 @@ Installs onto the Windows Server via Roles and Features
 
 Let me know if you want to map this to a Linux config or see how realm joins work.
 
+
+---
 
 ## Roles/Features
 
