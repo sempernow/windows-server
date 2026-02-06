@@ -1,4 +1,4 @@
-# WinSrv DCs (`W32Time`) as time sources of Linux `chrony`
+# WinSrv DC (`W32Time`) as time source of Linux `chrony`
 
 ## Q:
 
