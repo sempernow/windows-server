@@ -2,7 +2,8 @@
 
 ## Overview
 
-Windows Server remains the industry standard domain controller for IdP (AD DS), IdM (AD UAC), X.509 (AD CS), DNS and DHCP. Linux (RHEL) hosts join into its domain via realm and SSSD.
+Windows Server remains the industry standard domain controller for IdP (AD DS), IdM (AD UAC), 
+X.509 (AD CS), DNS and DHCP. Linux (RHEL) hosts join into its domain via realm and SSSD.
 
 However, engineers quickly learn that its prominence is due to clever vendor lock-in rather than any technological edge. In fact, WS2019 does not allow for any sort of automation, nonetheless DevOps/GitOps methods. Every domain becomes a handcrafted boutique; a once-per-universe configuration that will never, indeed can never, be repeated again. And the man hours required to craft one, even only to the point that it is tolerably sufficient, is gargantuan. As is its maintenance.
 

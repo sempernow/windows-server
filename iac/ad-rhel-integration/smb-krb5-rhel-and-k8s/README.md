@@ -197,49 +197,34 @@ mountCIFSntlmssp(){
 
 AD User (service account) __`sw-smb-rw`__ AuthN by Kerberos
 
-
 ### Kerberos ___Credentials Cache___
 
 - **`klist`**
-    - `KCM:322203108` (**KCM-based** cache)
-        - For login users
-    - `FILE:/tmp/krb5cc_322203108` (**File-based** cache)
-        - For non-login users
-
-#### &bull; KCM-based cache : *interactive* (normal) AD users 
-
-__KCM__ is SSSD's **K**erberos **C**redential **M**anager. 
-When a Linux (RHEL) host is joined into the AD domain via "`realm join`" 
-(or manual SSSD config), __the default credential cache__, 
-declared in **`/etc/krb5.conf`**, 
-is set to KCM:
-
-```ini
-[libdefaults]
-    default_ccache_name = KCM:
-```
-- So that `kinit` run _as any login user_ stores tickets in KCM automatically.
-
-#### &bull; File-based cache : *non-interactive* (service account) AD users 
-
-KCM does *not* manage non-interactive (service account) AD users.
-Service accounts and other such ___non-interactive users typically configure file-based Kerberos ticket management___.
+    - `KCM:<CRUID>` (**KCM-based** cache)
+        - The modern, daemon-based method;  
+          supercedes kernel-based _keyring_ method
+        - Configuration: **`/etc/krb5.conf`**
+            ```ini
+            [libdefaults]
+                # Set KCM as the default cache store
+                default_ccache_name = KCM:
+            ```
+    - `FILE:/tmp/krb5cc_<CRUID>` (**File-based** cache)
+        - The original Kerberos ticket-management scheme;  
+          has many shortcomings.
 
 __Generate__ a per-user __keytab__ and __use file-based Kerberos cache__
 
-Typical use case:
-
-- __Keytab__ : **`/etc/$username.keytab`**
-    - Contains _credentials_
-- __Cache__: **`/tmp/krb5cc_$uid`**
-    - Contains _active tickets_
-
----
-
 <a id="generate-keytab-file"></a>
 
-### Kerberos ___Keytab___
+### Kerberos ___Keytab___ file
 
+**`/etc/<USERNAME>.keytab`**
+
+Required by non-login users (service accounts and machine accounts).  
+It contains their credentials and used to obtain (init/renew) Kerberos tickets.  
+Users are known to Kerberos by their SPN (**S**ervice **P**rincipal **N**ame):  
+`<USERNAME>@<REALM_FQDN>`
 
 #### Option A: Generate on Windows Server (Recommended)
 

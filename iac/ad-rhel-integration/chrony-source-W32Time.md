@@ -1,4 +1,4 @@
-# WinSrv DCs (`W32Time`) as time sources of Linux `chrony`
+# WinSrv DC (W32Time) as time source of Linux `chrony`
 
 ## Q:
 
@@ -6,14 +6,19 @@ Are Windows Server domain controllers not viable sources for  RHEL 8/9 `chrony` 
 
 ## A:
 
-Windows Server DCs are absolutely viable NTP sources for RHEL chrony—and in AD-integrated environments, they're often the *recommended* choice. A few considerations though:
+Windows Server DCs are absolutely viable NTP sources for RHEL chrony; 
+in AD-integrated environments, they're often the *recommended* choice. 
+A few considerations though:
 
 **Why it works well:**
-- DCs run W32Time and serve NTP on UDP 123 by default
+
+- DCs run W32Time service (`w32time.dll`) and serve __NTP__ on `UDP 123` by default
+    - CLI: `w32tm.exe`
 - Keeps time synchronized with the same source your Kerberos tickets depend on, avoiding clock skew authentication failures
 - Windows Server 2016+ significantly improved W32Time accuracy (sub-second when configured properly)
 
-**Typical `chrony.conf` for AD integration:**
+**Typical `/etc/chrony.conf` for AD integration:**
+
 ```
 server dc1.example.com iburst
 server dc2.example.com iburst
@@ -23,20 +28,29 @@ rtcsync
 ```
 
 **Caveats:**
-- Pre-2016 DCs: W32Time was historically accurate only to ~1-2 seconds, which is fine for Kerberos (5-minute tolerance) but inadequate if you need precision timing
-- PDC emulator hierarchy: In AD, the PDC emulator FSMO role holder is the authoritative time source—other DCs sync from it. If that DC has bad time, it propagates
-- Some orgs prefer a hybrid approach: DCs sync to stratum-1/2 external sources, Linux clients sync to DCs
+
+- Pre-2016 DCs:   
+  W32Time was historically accurate only to ~1-2 seconds, 
+  which is fine for __Kerberos__ (__5-minute tolerance__) 
+  but inadequate if you need precision timing.
+- PDC emulator hierarchy:   
+  In AD, the PDC emulator FSMO role holder is the authoritative time source;
+  other DCs sync from it. 
+  If that DC has bad time, it propagates.
+- Some orgs prefer a hybrid approach:  
+  DCs sync to stratum-1/2 external sources, 
+  Linux clients sync to DCs
 
 **If you're seeing issues**, the most common problems are:
-1. Firewall blocking UDP 123
-2. W32Time not configured to serve NTP to non-domain members (check `w32tm /query /configuration` on the DC)
-3. NTP version mismatches (rare with modern systems)
 
-Is there a specific problem you're running into, or is this more of an architecture planning question for your homelab IdM setup?
+1. Firewall blocking UDP 123
+2. W32Time not configured to serve NTP to non-domain members   
+  (check `w32tm /query /configuration` on the DC)
+3. NTP version mismatches (rare with modern systems)
 
 ## Q:
 
-There were issues replacing `pool` with `server` entries of domain controllers, 
+There were issues replacing `pool` with DC `server` entries, 
 but solved by two parameter settings:
 
 @ __`/etc/chrony.conf`__
@@ -50,7 +64,7 @@ maxdistance 16
 
 ## A:
 
-Ah, those are the classic __W32Time__ interop fixes.
+Ah, those are the classic W32Time interop fixes.
 
 **`acquisitionport 123`** — Some firewalls and older NTP implementations expect source port 123 (traditional ntpd behavior). _Chrony defaults to a random high port, which can get dropped_.
 
