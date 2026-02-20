@@ -236,6 +236,27 @@ mountCIFSkrb5(){
     
     return 0
 }
+## Mount SMB share as user $1 using Kerberos for AuthN; persist
+mountCIFSkrb5Persist(){
+    [[ "$(id -u)" -ne 0 ]] && return 1
+    [[ $1 ]] || return 2
+    svc=$1
+    mode=${2:-service} # service|group|unmount
+    server=dc1.lime.lan
+    share=SMBdata
+    mnt=/mnt/smb-data-01
+    mkdir -p $mnt || return 3
+    cruid="$(id -u $svc)"
+    uid=0
+    gid="$(getent group ad-smb-admins |cut -d: -f3)"
+
+    grep -q $mnt /etc/fstab 2>/dev/null || {
+        sudo tee -a <<-EOH
+		## SMB : $(id $svc)
+		//$server/$share  $mnt  cifs  vers=3.0,sec=krb5,cruid=$cruid,uid=$uid,gid=$gid,dir_mode=0775,file_mode=0660    0 0
+		EOH
+    }
+}
 verifyAccess(){
     [[ $1 ]] || return 1
     echo "ℹ️ Verify access by $1@$(hostname -f) : $(id $1)"
