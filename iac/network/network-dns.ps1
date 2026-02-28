@@ -55,4 +55,4 @@ Get-DnsClient | Select-Object InterfaceAlias, ConnectionSpecificSuffix
 # # [network]
 # # generateResolvConf = false
 # nameserver 10.255.255.254
-# search SEMPERLAN lime.lan hsd1.md.comcast.net
+# search hsd1.md.comcast.net lime.lan
