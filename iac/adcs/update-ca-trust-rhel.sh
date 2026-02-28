@@ -28,7 +28,7 @@ update-ca-trust || {
 
 # Requires CA and host having same domain.
 ref=$(hostname -d)
-head /etc/ssl/certs/ca-bundle.crt |grep ${ref%.*} || {
+head /etc/ssl/certs/ca-bundle.crt |grep -q "\b${ref%.*}\b" || {
     echo "️❌ ERR : CA reference '${ref%.*}' NOT found in ca-bundle.crt" >&2
 
     exit 44
