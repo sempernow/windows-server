@@ -194,7 +194,7 @@ mountCIFSntlmssp(){
     
     return 0
 }
-## Mount SMB share as user $1 using Kerberos for AuthN
+## Mount SMB share by Kerberos AuthN of username $1
 mountCIFSkrb5(){
     [[ "$(id -u)" -ne 0 ]] && return 1
     [[ $1 ]] || return 2
@@ -236,7 +236,7 @@ mountCIFSkrb5(){
     
     return 0
 }
-## Mount SMB share as user $1 using Kerberos for AuthN; persist
+## Mount SMB share by Kerberos AuthN of username $1, persistently.
 mountCIFSkrb5Persist(){
     [[ "$(id -u)" -ne 0 ]] && return 1
     [[ $1 ]] || return 2
@@ -247,15 +247,24 @@ mountCIFSkrb5Persist(){
     mnt=/mnt/smb-data-01
     mkdir -p $mnt || return 3
     cruid="$(id -u $svc)"
-    uid=0
+    ## Allow R/W access by UID 1001 users and members of AD Group 'ad-smb-admins'
+    uid=1001
     gid="$(getent group ad-smb-admins |cut -d: -f3)"
 
-    grep -q $mnt /etc/fstab 2>/dev/null || {
-        sudo tee -a <<-EOH
-		## SMB : $(id $svc)
+    [[ $mode == unmount ]] && {
+        umount $mnt
+        ls -hl $mnt
+        return $?
+    }
+    target=/etc/fstab
+    grep -q $mnt $target 2>/dev/null || {
+        sudo tee -a $target <<-EOH
+		## CIFS (SMB) : $(id $svc)
 		//$server/$share  $mnt  cifs  vers=3.0,sec=krb5,cruid=$cruid,uid=$uid,gid=$gid,dir_mode=0775,file_mode=0660    0 0
 		EOH
     }
+    grep -q $mnt $target 2>/dev/null || return 11
+
 }
 verifyAccess(){
     [[ $1 ]] || return 1
