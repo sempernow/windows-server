@@ -5,15 +5,15 @@
 Windows Server remains the industry standard domain controller for IdP (AD DS), IdM (AD UAC), 
 X.509 (AD CS), DNS and DHCP. Linux (RHEL) hosts join into its domain via realm and SSSD.
 
-However, engineers quickly learn that its prominence is due to clever vendor lock-in rather than any technological edge. In fact, WS2019 does not allow for any sort of automation, nonetheless DevOps/GitOps methods. Every domain becomes a handcrafted boutique; a once-per-universe configuration that will never, indeed can never, be repeated again. And the man hours required to craft one, even only to the point that it is tolerably sufficient, is gargantuan. As is its maintenance.
+However, engineers quickly learn that its prominence is due to clever vendor lock-in rather than any technological edge. In fact, WS2019 does not allow for any sort of automation, nonetheless DevOps/GitOps methods. Every domain becomes a handcrafted boutique; a once-per-universe configuration that will never, indeed can never, be repeated again. And the man hours required to craft one, even only to the point of tolerabe sufficiency, are enormous. To maintain it is to manage the ever-expanding chaos that creeps in with each and every hand-crafted change.
 
 Vendor marketing:
 
-_&hellip; the operating system that bridges on-premises environments 
+>_&hellip; the operating system that bridges on-premises environments 
 with Azure services enabling hybrid scenarios maximizing existing investments. 
 Create cloud native and modernize traditional apps using containers and micro-services._
 
-That last sentence is laughable. Enterprises are slowly escaping the Windows hellscape, and moving to a purely K8s-based infra. Though very slowly.
+That last sentence is laughable. Enterprises are slowly escaping the Windows hellscape, and moving to a purely Kubernetes-based infra. Though very slowly.
 
 ### Installation options (2016/2019):
 
